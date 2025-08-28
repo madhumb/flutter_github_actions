@@ -78,6 +78,8 @@ jobs:
           firebase appdistribution:distribute build/Runner/Runner.ipa \
             --app "$FIREBASE_APP_ID" \
             --groups "beta-testers" \
+            --p12-file FirebaseDistributionCredentials.p12 \
+            --release-notes "Release notes here" \
             --token "$FIREBASE_SERVICE_ACCOUNT"
 
       - name: Upload IPA as Artifact
