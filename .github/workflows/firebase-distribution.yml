@@ -260,7 +260,7 @@ jobs:
     # Build IPA
     - name: Build iOS IPA (Star)
       run: |
-        flutter build ipa --release --flavor star -t lib/main_star.dart
+        flutter build ipa --flavor star -t lib/main_star.dart --release
 
     # Upload IPA to Firebase App Distribution
     - name: Upload to Firebase App Distribution (Star iOS)
