@@ -26,9 +26,8 @@ jobs:
         run: |
          echo "$FIREBASE_DISTRIBUTION_IOS_CREDENTIAL_FILE_CONTENT" | base64 --decode > FirebaseDistributionCredentials.p12
          chmod 600 FirebaseDistributionCredentials.p12
-         security create-keychain -p "" build.keychain
-         
-         security unlock-keychain -p "" ~/Library/Keychains/build.keychain
+         security create-keychain -p "$CERT_PASSWORD" build.keychain
+         security unlock-keychain -p "$CERT_PASSWORD" ~/Library/Keychains/build.keychain
          security list-keychains -s ~/Library/Keychains/build.keychain
          security import FirebaseDistributionCredentials.p12 \
          -k ~/Library/Keychains/build.keychain \
