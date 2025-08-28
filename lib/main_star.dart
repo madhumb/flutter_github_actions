@@ -19,7 +19,7 @@ class DefaultFirebaseOptions {
         );
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
-        throw UnsupportedError('Fuchsia not supported');
+        throw UnsupportedError('Fuchsia not supported ');
       default:
         throw UnsupportedError('Unknown platform');
     }
