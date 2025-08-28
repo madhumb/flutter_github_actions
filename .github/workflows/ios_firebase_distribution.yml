@@ -1,15 +1,15 @@
-name: Build iOS IPA and Upload to Firebase
+name: Build iOS IPA (Star Flavor) and Upload to Firebase
 
 on:
   workflow_dispatch:
 
 jobs:
-  build-ios:
+  build-ios-star:
     runs-on: macos-latest
     env:
       CERT_PASSWORD: ${{ secrets.CERT_PASSWORD }}
       TEAM_ID: ${{ secrets.TEAM_ID }}
-      PROFILE_NAME: ${{ secrets.PROVISIONING_PROFILE_NAME }}
+      PROFILE_NAME: ${{ secrets.PROVISIONING_PROFILE_NAME_STAR }}
       FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
       FIREBASE_APP_ID: ${{ secrets.FIREBASE_IOS_APP_ID_STAR }}
 
@@ -25,26 +25,26 @@ jobs:
       - name: Install Certificates
         run: |
           security create-keychain -p "" build.keychain
-          security import ./certs/ios_distribution.p12 -k ~/Library/Keychains/build.keychain -P "$CERT_PASSWORD" -T /usr/bin/codesign
+          security import ./certs/ios_distribution_star.p12 -k ~/Library/Keychains/build.keychain -P "$CERT_PASSWORD" -T /usr/bin/codesign
           security list-keychains -s ~/Library/Keychains/build.keychain
           security unlock-keychain -p "" ~/Library/Keychains/build.keychain
 
       - name: Install Provisioning Profile
         run: |
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp ./profiles/*.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+          cp ./profiles/star/*.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
 
       - name: Flutter pub get
         run: flutter pub get
 
-      - name: Build iOS App
-        run: flutter build ios --release --no-codesign
+      - name: Build iOS App (Star Flavor)
+        run: flutter build ios --flavor star -t main-star.dart --release --no-codesign
 
       - name: Archive with xcodebuild
         run: |
           xcodebuild -workspace ios/Runner.xcworkspace \
-            -scheme Runner \
-            -configuration Release \
+            -scheme star \
+            -configuration star Release \
             -archivePath build/Runner.xcarchive archive \
             CODE_SIGN_STYLE=Manual \
             PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
@@ -55,7 +55,7 @@ jobs:
           xcodebuild -exportArchive \
             -archivePath build/Runner.xcarchive \
             -exportPath build/Runner \
-            -exportOptionsPlist ios/ExportOptions.plist
+            -exportOptionsPlist ios/ExportOptions-star.plist
 
       - name: Install Firebase CLI
         run: |
@@ -64,9 +64,8 @@ jobs:
       - name: Authenticate Firebase
         run: |
           echo "$FIREBASE_SERVICE_ACCOUNT" > serviceAccountKey.json
-          firebase login:ci --token "$(cat serviceAccountKey.json)" || echo "Using service account"
 
-      - name: Upload IPA to Firebase App Distribution
+      - name: Upload IPA to Firebase App Distribution (Star Flavor)
         run: |
           firebase appdistribution:distribute build/Runner/Runner.ipa \
             --app "$FIREBASE_APP_ID" \
@@ -74,7 +73,7 @@ jobs:
             --token "$FIREBASE_SERVICE_ACCOUNT"
 
       - name: Upload IPA as Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Runner.ipa
           path: build/Runner/Runner.ipa
