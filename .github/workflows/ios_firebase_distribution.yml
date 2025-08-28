@@ -28,6 +28,7 @@ jobs:
          chmod 600 FirebaseDistributionCredentials.p12
          security create-keychain -p "$CERT_PASSWORD" build.keychain
          security unlock-keychain -p "$CERT_PASSWORD" ~/Library/Keychains/build.keychain
+         security set-keychain-settings -t 3600 -l ~/Library/Keychains/build.keychain
          security list-keychains -s ~/Library/Keychains/build.keychain
          security import FirebaseDistributionCredentials.p12 \
          -k ~/Library/Keychains/build.keychain \
