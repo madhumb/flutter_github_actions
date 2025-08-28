@@ -24,14 +24,17 @@ jobs:
 
       - name: Install Certificates
         run: |
-         echo "$IOS_CERTIFICATE_STAR_BASE64" | base64 --decode > ios_distribution_star.p12
+         echo "$IOS_CERTIFICATE_STAR_BASE64" | base64 --decode > FIREBASE_DISTRIBUTION_IOS_CREDENTIAL_FILE_CONTENT.p12
          security create-keychain -p "" build.keychain
-         security import ios_distribution_star.p12 \
+         
+         security unlock-keychain -p "" ~/Library/Keychains/build.keychain
+         security list-keychains -s ~/Library/Keychains/build.keychain
+         security import FIREBASE_DISTRIBUTION_IOS_CREDENTIAL_FILE_CONTENT.p12 \
          -k ~/Library/Keychains/build.keychain \
          -P "$CERT_PASSWORD" \
          -T /usr/bin/codesign
-         security list-keychains -s ~/Library/Keychains/build.keychain
-         security unlock-keychain -p "" ~/Library/Keychains/build.keychain
+         
+         
 
       - name: Install Provisioning Profile
         run: |
