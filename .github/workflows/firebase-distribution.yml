@@ -260,7 +260,12 @@ jobs:
     # Build IPA
     - name: Build iOS IPA (Star)
       run: |
-        flutter build ipa --flavor star -t lib/main_star.dart --release
+        # flutter build ipa --flavor star -t lib/main_star.dart --release --no-codesign 
+        xcodebuild archive \
+         -workspace Runner.xcworkspace \
+          -scheme Runner \
+          -configuration Release \
+        -allowProvisioningUpdates
 
     # Upload IPA to Firebase App Distribution
     - name: Upload to Firebase App Distribution (Star iOS)
