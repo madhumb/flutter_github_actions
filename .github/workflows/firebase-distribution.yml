@@ -223,3 +223,53 @@ jobs:
           groups: ${{ secrets.FIREBASE_STAR_QA_GROUP }}
           releaseNotes: "GitHub Actions automated build (APK)"
           file: build/app/outputs/flutter-apk/app-star-release.apk
+           
+          
+  build-star-ios:
+    needs: setup
+    if: ${{ github.event.inputs.flavor == 'star' || github.event.inputs.flavor == 'all' }}
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        flutter-version: ${{ needs.setup.outputs.flutter-version }}
+
+    - run: flutter pub get
+
+    # Setup Certificates
+    - name: Setup iOS Certificates
+      run: |
+        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+        echo "$IOS_MOBILEPROVISION_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/star.mobileprovision
+        echo "$IOS_CERT_BASE64" | base64 --decode > ios_distribution.p12
+        security create-keychain -p "" build.keychain
+        security import ios_distribution.p12 -k ~/Library/Keychains/build.keychain -P "$IOS_CERT_PASSWORD" -T /usr/bin/codesign
+        security list-keychains -s ~/Library/Keychains/build.keychain
+        security default-keychain -s ~/Library/Keychains/build.keychain
+        security unlock-keychain -p "" ~/Library/Keychains/build.keychain
+        security set-key-partition-list -S apple-tool:,apple: -s -k "" ~/Library/Keychains/build.keychain
+      env:
+        IOS_CERT_BASE64: ${{ secrets.IOS_CERT_BASE64 }}
+        IOS_CERT_PASSWORD: ${{ secrets.IOS_CERT_PASSWORD }}
+        IOS_MOBILEPROVISION_BASE64: ${{ secrets.IOS_MOBILEPROVISION_BASE64 }}
+
+    # Build IPA
+    - name: Build iOS IPA (Star)
+      run: |
+        flutter build ipa --release \
+          --flavor star \
+          -t lib/main_star.dart
+
+    # Upload IPA to Firebase App Distribution
+    - name: Upload to Firebase App Distribution (Star iOS)
+      uses: wzieba/Firebase-Distribution-Github-Action@v1
+      with:
+        appId: ${{ secrets.FIREBASE_IOS_STAR_APP_ID }}
+        serviceCredentialsFileContent: ${{ secrets.FIREBASE_DISTRIBUTION_IOS_CREDENTIAL_FILE_CONTENT }}
+        groups: ${{ secrets.FIREBASE_IOS_STAR_QA_GROUP }}
+        releaseNotes: "GitHub Actions automated build (IPA)"
+        file: build/ios/ipa/Runner.ipa
