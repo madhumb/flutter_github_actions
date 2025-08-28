@@ -241,7 +241,7 @@ jobs:
     - run: flutter pub get
 
     # Setup Certificates
-    - name: Setup iOS Certificates
+    - name: Setup iOS Certificate
       run: |
         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
         echo "$IOS_MOBILEPROVISION_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/star.mobileprovision
@@ -258,7 +258,7 @@ jobs:
         IOS_MOBILEPROVISION_BASE64: ${{ secrets.IOS_MOBILEPROVISION_BASE64 }}
 
     # Build IPA
-    - name: Build iOS IPA (Star)
+    - name: Build iOS IPA -Star
       run: |
         flutter build ipa --flavor star -t lib/main_star.dart --release
 
