@@ -99,13 +99,13 @@ jobs:
       - name: Archive app
         run: |
           xcodebuild -workspace ios/Runner.xcworkspace \
-            -scheme star \
-            -configuration "star Release"
+            -scheme "star" \
+            -configuration Release
             -archivePath build/Runner.xcarchive \
             archive DEVELOPMENT_TEAM=ZCEY7L7MT7 \
             CODE_SIGN_STYLE=Manual \
             PROVISIONING_PROFILE_SPECIFIER="com.gnkbros.app appstore" \
-            PRODUCT_BUNDLE_IDENTIFIER=com.gnkbros.app
+            PRODUCT_BUNDLE_IDENTIFIER=com.gnkbros.app -allowProvisioningUpdates
 
       # Export IPA
       - name: Export IPA
