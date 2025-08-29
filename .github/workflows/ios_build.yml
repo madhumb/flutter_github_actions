@@ -2,6 +2,9 @@ name: Build iOS IPA
 
 on:
   workflow_dispatch:
+  push:
+   branches:
+     - main   # runs on push to main branch
 
 jobs:
   build-ios:
@@ -65,7 +68,7 @@ jobs:
           
           # Build Flutter iOS
       - name: Build Flutter iOS
-        run: flutter build ios --release --no-codesign
+        run: flutter build ipa --release --no-codesign --flavor star --release -t lib/main_star.dart
 
         
       # Archive the app with Xcode
