@@ -1,9 +1,9 @@
 name: iOS TestFlight Release
 
 on:
-  push:
-    branches:
-      - main  # Trigger on main branch push
+  # push:
+  #   branches:
+  #     - main  # Trigger on main branch push
   workflow_dispatch:  # Or manually trigger
 
 jobs:
