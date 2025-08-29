@@ -28,7 +28,12 @@ jobs:
 
       # Install dependencies
       - name: Flutter pub get
-        run: flutter pub get
+        run: |
+         flutter clean
+         rm -rf ios/Pods ios/Podfile.lock
+         flutter pub get
+         cd ios && pod install
+         
 
       - name: Decode and verify certificate
         run: |
@@ -66,9 +71,28 @@ jobs:
       - name: Generate env.g.dart with Envied
         run: dart run build_runner build --delete-conflicting-outputs
           
-          # Build Flutter iOS
+
+      - name: create Exportplist file
+        run: |
+          cat > ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>teamID</key><string>ZCEY7L7MT7</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.gnkbros.app</key><string>com.gnkbros.app appstore</string>
+            </dict>
+          </dict>
+          </plist>
+          EOF
+    
+          
       - name: Build Flutter iOS
-        run: flutter build ipa --flavor star -t lib/main_star.dart --release --no-codesign 
+        run: flutter build ipa --flavor star -t lib/main_star.dart --release --no-codesign --export-options-plist ios/ExportOptions.plist
 
         
       # Archive the app with Xcode
@@ -86,22 +110,7 @@ jobs:
       # Export IPA
       - name: Export IPA
         run: |
-          cat > ExportOptions.plist <<EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>method</key><string>app-store</string>
-            <key>signingStyle</key><string>manual</string>
-            <key>teamID</key><string>ZCEY7L7MT7</string>
-            <key>provisioningProfiles</key>
-            <dict>
-              <key>com.gnkbros.app</key><string>com.gnkbros.app appstore</string>
-            </dict>
-          </dict>
-          </plist>
-          EOF
-
+          
           xcodebuild -exportArchive \
             -archivePath build/Runner.xcarchive \
             -exportOptionsPlist ExportOptions.plist \
