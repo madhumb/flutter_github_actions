@@ -26,10 +26,10 @@ jobs:
       - name: Install signing certificate
         run: |
           echo "$FIREBASE_DISTRIBUTION_IOS_CREDENTIAL_FILE_CONTENT" | base64 --decode > certificate.p12
-          security create-keychain -p "" build.keychain
+          security create-keychain -p "test" build.keychain
           security import certificate.p12 -k ~/Library/Keychains/build.keychain -P "$CERT_PASSWORD" -T /usr/bin/codesign
           security list-keychains -s ~/Library/Keychains/build.keychain
-          security unlock-keychain -p "" ~/Library/Keychains/build.keychain
+          security unlock-keychain -p "test" ~/Library/Keychains/build.keychain
           rm certificate.p12
 
       # Install provisioning profile
