@@ -59,12 +59,10 @@ jobs:
          PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< "$(security cms -D -i app.mobileprovision)")
 
          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-         cp app.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$PROFILE_UUID.mobileprovision
+         cp app.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles
 
-         echo "PROFILE_UUID=$PROFILE_UUID" >> $GITHUB_ENV
-
-           security cms -D -i app.mobileprovision > profile.plist
-           cat profile.plist | head -50
+         security cms -D -i app.mobileprovision > profile.plist
+         cat profile.plist | head -50
       
      
       - name: Setup .env file
