@@ -57,7 +57,14 @@ jobs:
       - name: Install provisioning profile
         run: |
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          
           echo "$IOS_PROVISIONING_PROFILE_BASE64_APPStore_GNKBros" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision
+          PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< $(security cms -D -i app.mobileprovision))
+           # Copy to the correct location
+           cp app.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$PROFILE_UUID.mobileprovision
+
+           echo "PROFILE_UUID=$PROFILE_UUID" >> $GITHUB_ENV
+
       
      
       - name: Setup .env file
@@ -104,7 +111,8 @@ jobs:
             -archivePath build/Runner.xcarchive \
             archive DEVELOPMENT_TEAM=ZCEY7L7MT7 \
             CODE_SIGN_STYLE=Manual \
-            PROVISIONING_PROFILE_SPECIFIER="com.gnkbros.app appstore" \
+            -destination 'generic/platform=iOS' \
+            PROVISIONING_PROFILE_SPECIFIER=$PROFILE_UUID \
             PRODUCT_BUNDLE_IDENTIFIER=com.gnkbros.app -allowProvisioningUpdates
 
       # Export IPA
