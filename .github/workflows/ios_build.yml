@@ -51,10 +51,16 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           echo "$IOS_PROVISIONING_PROFILE_BASE64_APPStore_GNKBros" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision
 
-      # Build Flutter iOS
+      
+      - name: Generate env.g.dart with Envied
+        run: dart run build_runner build --delete-conflicting-outputs
+        
+          
+          # Build Flutter iOS
       - name: Build Flutter iOS
         run: flutter build ios --release --no-codesign
 
+        
       # Archive the app with Xcode
       - name: Archive app
         run: |
