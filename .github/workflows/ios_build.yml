@@ -100,7 +100,7 @@ jobs:
         run: |
           xcodebuild -workspace ios/Runner.xcworkspace \
             -scheme star \
-            -configuration star\ Release \
+            -configuration "star Release"
             -archivePath build/Runner.xcarchive \
             archive DEVELOPMENT_TEAM=ZCEY7L7MT7 \
             CODE_SIGN_STYLE=Manual \
