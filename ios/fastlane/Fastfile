@@ -1,0 +1,5 @@
+lane :deploy_star do
+    upload_to_testflight
+  end
+
+  
