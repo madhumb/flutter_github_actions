@@ -22,13 +22,6 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
-      - name: Debug certificate
-        run: |
-            echo "$IOS_CERT_BASE64" | base64 --decode > certificate.p12
-            file certificate.p12
-            openssl pkcs12 -in certificate.p12 -nokeys -passin pass:"$IOS_CERT_PASSWORD"
-
-
       # Decode and install signing certificate
       - name: Install signing 
         env:
@@ -37,7 +30,7 @@ jobs:
         run: |
           echo "$IOS_CERT_BASE64" | base64 --decode > certificate.p12
           security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
-          security import certificate.p12 -k ~/Library/Keychains/build.keychain -P "$IOS_CERT_PASSWORD" -T /usr/bin/codesign -A
+          security import certificate.p12 -k ~/Library/Keychains/build.keychain -P "$CERT_PASSWORD" -T /usr/bin/codesign -A
           security list-keychains -s ~/Library/Keychains/build.keychain
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" ~/Library/Keychains/build.keychain
           rm certificate.p12
