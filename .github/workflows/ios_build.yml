@@ -41,10 +41,8 @@ jobs:
           file certificate.p12
           openssl pkcs12 -in certificate.p12 -nokeys -passin pass:"$CERT_PASSWORD"
 
-
       # Decode and install signing certificate
       - name: Install signing 
-       
         run: |
           echo "$IOS_CERT_BASE64" | base64 --decode > certificate.p12
           security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
@@ -56,15 +54,15 @@ jobs:
       # Install provisioning profile
       - name: Install provisioning profile
         run: |
+         echo "$IOS_PROVISIONING_PROFILE_BASE64_APPStore_GNKBros" | base64 --decode > app.mobileprovision
+
+         PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< "$(security cms -D -i app.mobileprovision)")
+
          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-         echo "${{ secrets.IOS_PROVISIONING_PROFILE_BASE64_APPStore_GNKBros }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision
+         cp app.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$PROFILE_UUID.mobileprovision
 
-          echo "$IOS_PROVISIONING_PROFILE_BASE64_APPStore_GNKBros" | base64 --decode > app.mobileprovision
-          PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< $(security cms -D -i app.mobileprovision))
-           # Copy to the correct location
-           cp app.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$PROFILE_UUID.mobileprovision
+         echo "PROFILE_UUID=$PROFILE_UUID" >> $GITHUB_ENV
 
-           echo "PROFILE_UUID=$PROFILE_UUID" >> $GITHUB_ENV
            security cms -D -i app.mobileprovision > profile.plist
            cat profile.plist | head -50
       
