@@ -68,7 +68,7 @@ jobs:
           
           # Build Flutter iOS
       - name: Build Flutter iOS
-        run: flutter build ios --release --no-codesign --flavor star --release -t lib/main_star.dart --no-simulator
+        run: flutter build ipa --release --no-codesign --flavor star --release -t lib/main_star.dart --no-simulator
 
         
       # Archive the app with Xcode
