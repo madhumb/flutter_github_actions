@@ -56,8 +56,9 @@ jobs:
       # Install provisioning profile
       - name: Install provisioning profile
         run: |
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          
+         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+         echo "${{ secrets.IOS_PROVISIONING_PROFILE_BASE64_APPStore_GNKBros }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision
+
           echo "$IOS_PROVISIONING_PROFILE_BASE64_APPStore_GNKBros" | base64 --decode > app.mobileprovision
           PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< $(security cms -D -i app.mobileprovision))
            # Copy to the correct location
