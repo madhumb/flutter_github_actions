@@ -1,0 +1,86 @@
+name: Build iOS IPA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.24.5'
+          cache: true # set your Flutter version
+
+      # Install dependencies
+      - name: Flutter pub get
+        run: flutter pub get
+
+      # Decode and install signing certificate
+      - name: Install signing certificate
+        run: |
+          echo "$FIREBASE_DISTRIBUTION_IOS_CREDENTIAL_FILE_CONTENT" | base64 --decode > certificate.p12
+          security create-keychain -p "" build.keychain
+          security import certificate.p12 -k ~/Library/Keychains/build.keychain -P "$CERT_PASSWORD" -T /usr/bin/codesign
+          security list-keychains -s ~/Library/Keychains/build.keychain
+          security unlock-keychain -p "" ~/Library/Keychains/build.keychain
+          rm certificate.p12
+
+      # Install provisioning profile
+      - name: Install provisioning profile
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$IOS_PROVISIONING_PROFILE_BASE64_APPStore_GNKBros" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision
+
+      # Build Flutter iOS
+      - name: Build Flutter iOS
+        run: flutter build ios --release --no-codesign
+
+      # Archive the app with Xcode
+      - name: Archive app
+        run: |
+          xcodebuild -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -archivePath build/Runner.xcarchive \
+            archive DEVELOPMENT_TEAM=ZCEY7L7MT7 \
+            CODE_SIGN_STYLE=Manual \
+            PROVISIONING_PROFILE_SPECIFIER="com.gnkbros.app appstore" \
+            PRODUCT_BUNDLE_IDENTIFIER=com.gnkbros.app
+
+      # Export IPA
+      - name: Export IPA
+        run: |
+          cat > ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>teamID</key><string>ZCEY7L7MT7</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.gnkbros.app</key><string>com.gnkbros.app appstore</string>
+            </dict>
+          </dict>
+          </plist>
+          EOF
+
+          xcodebuild -exportArchive \
+            -archivePath build/Runner.xcarchive \
+            -exportOptionsPlist ExportOptions.plist \
+            -exportPath build/
+
+      # Upload artifact (IPA)
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: iOS-IPA
+          path: build/*.ipa
