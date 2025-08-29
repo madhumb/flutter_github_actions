@@ -50,11 +50,18 @@ jobs:
         run: |
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           echo "$IOS_PROVISIONING_PROFILE_BASE64_APPStore_GNKBros" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision
-
       
+     
+      - name: Setup .env file
+        run: |
+          echo "SECRET_KEY=$(echo $SECRET_KEY_BASE64 | base64 --decode)" >> .env
+          echo "BASE_URL=$(echo $BASE_URL_BASE64 | base64 --decode)" >> .env
+        env:
+          SECRET_KEY_BASE64: ${{ secrets.SECRET_KEY_BASE64 }}
+          BASE_URL_BASE64: ${{ secrets.BASE_URL_BASE64 }}
+ 
       - name: Generate env.g.dart with Envied
         run: dart run build_runner build --delete-conflicting-outputs
-        
           
           # Build Flutter iOS
       - name: Build Flutter iOS
