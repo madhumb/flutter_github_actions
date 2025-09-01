@@ -55,14 +55,16 @@ jobs:
       - name: Install provisioning profile
         run: |
          echo "$IOS_PROVISIONING_PROFILE_BASE64_APPStore_GNKBros" | base64 --decode > app.mobileprovision
-
+         file app.mobileprovision
+         ls -lh app.mobileprovision
+         
          PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< "$(security cms -D -i app.mobileprovision)")
 
          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-         cp app.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles
+         cp app.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
 
          security cms -D -i app.mobileprovision > profile.plist
-         cat profile.plist | head -50
+         /usr/libexec/PlistBuddy -c "Print :UUID" profile.plist
       
      
       - name: Setup .env file
