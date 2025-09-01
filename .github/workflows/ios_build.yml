@@ -54,9 +54,9 @@ jobs:
       # Install provisioning profile
       - name: Install provisioning profile
         run: |
-         echo "Secret length: ${#IOS_PROVISIONING_PROFILE_BASE64_APPSTORE_GNKBROS}"
+         echo "Secret length: ${#PROV_PRO_APPStore_GNK}"
 
-         echo "$IOS_PROVISIONING_PROFILE_BASE64_APPSTORE_GNKBROS" | base64 --decode > app.mobileprovision
+         echo "$PROV_PRO_APPStore_GNK" | base64 --decode > app.mobileprovision
          file app.mobileprovision
          ls -lh app.mobileprovision
          
