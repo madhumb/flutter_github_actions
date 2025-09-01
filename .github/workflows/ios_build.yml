@@ -13,6 +13,8 @@ jobs:
         KEYCHAIN_PASSWORD: "github"       # arbitrary, only for CI keychain
         CERT_PASSWORD: ${{ secrets.IOS_CERT_PASSWORD }}   # your .p12 export password
         IOS_CERT_BASE64: ${{ secrets.IOS_CERT_BASE64 }}
+        PROV_PRO_APPStore_GNK: ${{ secrets.PROV_PRO_APPStore_GNK }}
+
 
 
     steps:
@@ -52,15 +54,13 @@ jobs:
           rm certificate.p12
 
       - name: Debug Secret
-       run: |
-        if [ -z "$PROV_PRO_APPStore_GNK" ]; then
-        echo "❌ Secret is empty or not passed to env."
-        else
-          echo "✅ Secret length: ${#PROV_PRO_APPStore_GNK}"
-        fi
-       env:
-        PROV_PRO_APPStore_GNK: ${{ secrets.PROV_PRO_APPStore_GNK }}
-
+        run: |
+         if [ -z "$PROV_PRO_APPStore_GNK" ]; then
+           echo "❌ Secret is empty or not passed to env."
+          else
+           echo "✅ Secret length: ${#PROV_PRO_APPStore_GNK}"
+          fi
+       
 
       # Install provisioning profile
       - name: Install provisioning profile
